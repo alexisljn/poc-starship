@@ -1,0 +1,17 @@
+services:
+  backend:
+    image: node:lts
+    volumes:
+      - ./backend:/home/node/app
+    working_dir: /home/node/app
+    ports:
+      - 3000:3000
+    command: sh -c "npm install --verbose && npm run dev"
+  frontend:
+    image: node:lts
+    volumes:
+      - ./frontend:/home/node/app
+    working_dir: /home/node/app
+    ports:
+      - 80:5173
+    command: sh -c "npm install --verbose && npm run dev"
