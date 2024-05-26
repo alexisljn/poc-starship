@@ -1,35 +1,151 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React, { useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const PIXEL_SIZE = 15;
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+const PIXEL_OFFSET = 5;
+
+type Color = 'black' | 'gray' | 'white' | 'red' | 'orange' | 'gold' | 'green' | 'aqua' | 'blue' | 'purple'
+
+function App() {
+    const [
+        windowDimensions,
+        setWindowDimensions
+    ] = useState<{width: number, height: number}>({width: 0, height: 0});
+
+    const [
+        mousePosition,
+        setMousePosition
+    ] = useState<{x: number, y: number}>({x: window.innerWidth / 2, y: window.innerHeight / 2});
+
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    const ctx = useMemo(() => {
+        if (!canvasRef.current) {
+            return null;
+        }
+
+        return canvasRef.current.getContext('2d');
+    }, [canvasRef.current]);
+
+    const colors: Color[] = useMemo(() => {
+        return ['black', 'gray', 'white', 'red', 'orange', 'gold', 'green', 'aqua', 'blue', 'purple'];
+    }, []);
+
+    const [color, setColor] = useState<Color>(colors[Math.floor(Math.random() * colors.length)]);
+
+    // Event Listeners
+    useEffect(() => {
+        function handleResize() {
+            console.log(window.innerWidth, window.innerHeight)
+            setWindowDimensions({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        }
+
+        function handleMouseMove(e: MouseEvent) {
+            setMousePosition({
+                x: e.clientX,
+                y: e.clientY
+            });
+        }
+
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+
+        window.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+
+            window.removeEventListener("mousemove", handleMouseMove);
+        };
+    }, []);
+
+
+    // Canvas Initialization
+    useEffect(() => {
+        if (!canvasRef.current || !ctx) {
+            return;
+        }
+
+        ctx.fillStyle = 'white';
+
+        ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }, [windowDimensions, canvasRef.current, ctx]);
+
+
+    const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (!ctx) {
+            return;
+        }
+
+        ctx.fillStyle = color;
+
+        ctx.fillRect(e.clientX - PIXEL_OFFSET, e.clientY - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
+    }, [ctx, color]);
+
+    return (
+        <div
+            style={{
+                backgroundColor: "gray",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "flex-end",
+                width: "100vw",
+                height: "100vh",
+            }}
+            onClick={handleClick}
+        >
+            <canvas
+                style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0
+                }}
+                ref={canvasRef}
+                width={windowDimensions.width}
+                height={windowDimensions.height}
+            ></canvas>
+            <div
+                id="palette"
+                style={{
+                    zIndex: 1,
+                    display: "flex",
+                    gap: "10px",
+                    paddingBottom: "40px"
+                }}
+            >
+                {colors.map((color) => (
+                    <div
+                        key={color}
+                        style={{
+                            cursor: "pointer",
+                            border: "3px solid lightgray",
+                            backgroundColor: color,
+                            width: 30,
+                            height: 30,
+                            borderRadius: 25
+                        }}
+                        onClick={() => setColor(color)}
+                    ></div>
+                ))}
+            </div>
+            <div
+                id="mouse-tracker"
+                style={{
+                    width: PIXEL_SIZE,
+                    height: PIXEL_SIZE,
+                    backgroundColor: color,
+                    position: "absolute",
+                    top: mousePosition.y - PIXEL_OFFSET,
+                    left: mousePosition.x - PIXEL_OFFSET,
+                }}
+            ></div>
+        </div>
+    )
 }
 
 export default App
