@@ -18,6 +18,8 @@ export default (httpServer: HttpServer) => {
 
         socket.on("paint", (coords: PaintCoords) => {
             store.push(coords);
+
+            socket.broadcast.emit("update", coords);
         })
 
         socket.on('disconnect', () => {

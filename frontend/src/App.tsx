@@ -89,6 +89,12 @@ function App() {
                 ctx.fillRect(paintCoords.x - PIXEL_OFFSET, paintCoords.y - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
             });
         });
+
+        socket.on("update", (paintCoords: PaintCoords) => {
+            ctx.fillStyle = paintCoords.color;
+
+            ctx.fillRect(paintCoords.x - PIXEL_OFFSET, paintCoords.y - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
+        })
     }, [socket, ctx]);
 
     // Canvas Initialization
