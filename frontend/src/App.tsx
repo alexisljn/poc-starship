@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import './App.css'
 import {io, Socket} from "socket.io-client";
+import {Color, Coords, PaintCoords} from "./types.ts";
 
 const PIXEL_SIZE = 15;
 
 const PIXEL_OFFSET = 5;
-
-type Color = 'black' | 'gray' | 'white' | 'red' | 'orange' | 'gold' | 'green' | 'aqua' | 'blue' | 'purple'
 
 function App() {
     const [
@@ -17,7 +16,7 @@ function App() {
     const [
         mousePosition,
         setMousePosition
-    ] = useState<{x: number, y: number}>({x: window.innerWidth / 2, y: window.innerHeight / 2});
+    ] = useState<Coords>({x: window.innerWidth / 2, y: window.innerHeight / 2});
 
     const [
         socket,
@@ -74,6 +73,24 @@ function App() {
         setSocket(io(import.meta.env.VITE_BACKEND_URL));
     }, []);
 
+    useEffect(() => {
+        if (!socket || !ctx) {
+            return;
+        }
+
+        socket.on("init", (paintsCoords: PaintCoords[]) => {
+            if (paintsCoords.length === 0) {
+                return;
+            }
+
+            paintsCoords.forEach((paintCoords) => {
+                ctx.fillStyle = paintCoords.color;
+
+                ctx.fillRect(paintCoords.x - PIXEL_OFFSET, paintCoords.y - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
+            });
+        });
+    }, [socket, ctx]);
+
     // Canvas Initialization
     useEffect(() => {
         if (!canvasRef.current || !ctx) {
@@ -94,7 +111,20 @@ function App() {
         ctx.fillStyle = color;
 
         ctx.fillRect(e.clientX - PIXEL_OFFSET, e.clientY - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
-    }, [ctx, color]);
+
+        if (!socket) {
+            alert("No socket");
+
+            return;
+        }
+
+        socket.emit("paint", {
+            x: e.clientX,
+            y: e.clientY,
+            color,
+        });
+
+    }, [ctx, color, socket]);
 
     return (
         <div
