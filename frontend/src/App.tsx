@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import './App.css'
+import {io, Socket} from "socket.io-client";
+import {Color, Coords, PaintCoords} from "./types.ts";
 
 const PIXEL_SIZE = 15;
 
 const PIXEL_OFFSET = 5;
-
-type Color = 'black' | 'gray' | 'white' | 'red' | 'orange' | 'gold' | 'green' | 'aqua' | 'blue' | 'purple'
 
 function App() {
     const [
@@ -16,7 +16,12 @@ function App() {
     const [
         mousePosition,
         setMousePosition
-    ] = useState<{x: number, y: number}>({x: window.innerWidth / 2, y: window.innerHeight / 2});
+    ] = useState<Coords>({x: window.innerWidth / 2, y: window.innerHeight / 2});
+
+    const [
+        socket,
+        setSocket
+    ] = useState<Socket | null>(null);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -37,7 +42,6 @@ function App() {
     // Event Listeners
     useEffect(() => {
         function handleResize() {
-            console.log(window.innerWidth, window.innerHeight)
             setWindowDimensions({
                 width: window.innerWidth,
                 height: window.innerHeight
@@ -64,6 +68,40 @@ function App() {
         };
     }, []);
 
+    // Socket Initialisation
+    useEffect(() => {
+        setSocket(io(import.meta.env.VITE_BACKEND_URL));
+    }, []);
+
+    useEffect(() => {
+        if (!socket || !ctx) {
+            return;
+        }
+
+        socket.on("init", (paintsCoords: PaintCoords[]) => {
+            if (paintsCoords.length === 0) {
+                return;
+            }
+
+            paintsCoords.forEach((paintCoords) => {
+                ctx.fillStyle = paintCoords.color;
+
+                ctx.fillRect(paintCoords.x - PIXEL_OFFSET, paintCoords.y - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
+            });
+        });
+
+        socket.on("update", (paintCoords: PaintCoords) => {
+            ctx.fillStyle = paintCoords.color;
+
+            ctx.fillRect(paintCoords.x - PIXEL_OFFSET, paintCoords.y - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
+        })
+
+        socket.on("reset", () => {
+            ctx.fillStyle = 'white';
+
+            ctx.fillRect(0, 0, canvasRef!.current!.width, canvasRef!.current!.height);
+        })
+    }, [socket, ctx]);
 
     // Canvas Initialization
     useEffect(() => {
@@ -85,7 +123,38 @@ function App() {
         ctx.fillStyle = color;
 
         ctx.fillRect(e.clientX - PIXEL_OFFSET, e.clientY - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
-    }, [ctx, color]);
+
+        if (!socket) {
+            alert("No socket");
+
+            return;
+        }
+
+        socket.emit("paint", {
+            x: e.clientX,
+            y: e.clientY,
+            color,
+        });
+
+    }, [ctx, color, socket]);
+
+    const handleColorChange = (e: React.MouseEvent<HTMLDivElement>, color: Color) => {
+        e.stopPropagation();
+
+        setColor(color);
+    }
+
+    const handleCanvasReset = useCallback((e: React.MouseEvent<HTMLSpanElement>) => {
+        e.stopPropagation();
+
+        if (!socket) {
+            alert("No socket");
+
+            return;
+        }
+
+        socket.emit("clear");
+    }, [socket]);
 
     return (
         <div
@@ -129,9 +198,22 @@ function App() {
                             height: 30,
                             borderRadius: 25
                         }}
-                        onClick={() => setColor(color)}
+                        onClick={(e) => handleColorChange(e, color)}
                     ></div>
                 ))}
+                <div
+                    style={{
+                        alignSelf: "center",
+                    }}
+                >
+                    <span
+                        style={{
+                            fontSize: 25,
+                            cursor: "pointer",
+                        }}
+                        onClick={(e) => handleCanvasReset(e)}
+                    >🗑️</span>️
+                </div>
             </div>
             <div
                 id="mouse-tracker"
