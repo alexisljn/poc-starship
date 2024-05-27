@@ -1,3 +1,15 @@
 import {PaintCoords} from "./types";
 
-export const store: PaintCoords[] = [];
+let store: PaintCoords[] = [];
+
+export function getStore() {
+    return store;
+}
+
+export function addToStore(coords: PaintCoords) {
+    store.push(coords);
+}
+
+export function clearStore() {
+    store = [];
+}
