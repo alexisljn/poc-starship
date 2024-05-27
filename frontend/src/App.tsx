@@ -95,6 +95,12 @@ function App() {
 
             ctx.fillRect(paintCoords.x - PIXEL_OFFSET, paintCoords.y - PIXEL_OFFSET, PIXEL_SIZE, PIXEL_SIZE);
         })
+
+        socket.on("reset", () => {
+            ctx.fillStyle = 'white';
+
+            ctx.fillRect(0, 0, canvasRef!.current!.width, canvasRef!.current!.height);
+        })
     }, [socket, ctx]);
 
     // Canvas Initialization
@@ -131,6 +137,24 @@ function App() {
         });
 
     }, [ctx, color, socket]);
+
+    const handleColorChange = (e: React.MouseEvent<HTMLDivElement>, color: Color) => {
+        e.stopPropagation();
+
+        setColor(color);
+    }
+
+    const handleCanvasReset = useCallback((e: React.MouseEvent<HTMLSpanElement>) => {
+        e.stopPropagation();
+
+        if (!socket) {
+            alert("No socket");
+
+            return;
+        }
+
+        socket.emit("clear");
+    }, [socket]);
 
     return (
         <div
@@ -174,9 +198,22 @@ function App() {
                             height: 30,
                             borderRadius: 25
                         }}
-                        onClick={() => setColor(color)}
+                        onClick={(e) => handleColorChange(e, color)}
                     ></div>
                 ))}
+                <div
+                    style={{
+                        alignSelf: "center",
+                    }}
+                >
+                    <span
+                        style={{
+                            fontSize: 25,
+                            cursor: "pointer",
+                        }}
+                        onClick={(e) => handleCanvasReset(e)}
+                    >🗑️</span>️
+                </div>
             </div>
             <div
                 id="mouse-tracker"

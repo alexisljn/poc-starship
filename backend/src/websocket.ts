@@ -1,6 +1,6 @@
 import {Server as HttpServer} from "http";
 import {Server} from "socket.io";
-import {store} from "./store";
+import {addToStore, clearStore, getStore} from "./store";
 import {PaintCoords} from "./types";
 
 export default (httpServer: HttpServer) => {
@@ -12,18 +12,24 @@ export default (httpServer: HttpServer) => {
     })
 
     io.on('connection', (socket) => {
-        console.log('a user connected');
+        console.log('a user connected: ', socket.id);
 
-        socket.emit("init", store);
+        socket.emit("init", getStore());
 
         socket.on("paint", (coords: PaintCoords) => {
-            store.push(coords);
+            addToStore(coords);
 
             socket.broadcast.emit("update", coords);
         })
 
+        socket.on("clear", () => {
+            clearStore();
+
+            io.emit("reset", getStore());
+        })
+
         socket.on('disconnect', () => {
-            console.log('user disconnected');
+            console.log('user disconnected: ', socket.id);
         });
     });
 }
