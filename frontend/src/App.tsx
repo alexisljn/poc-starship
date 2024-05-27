@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import './App.css'
+import {io, Socket} from "socket.io-client";
 
 const PIXEL_SIZE = 15;
 
@@ -17,6 +18,11 @@ function App() {
         mousePosition,
         setMousePosition
     ] = useState<{x: number, y: number}>({x: window.innerWidth / 2, y: window.innerHeight / 2});
+
+    const [
+        socket,
+        setSocket
+    ] = useState<Socket | null>(null);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -37,7 +43,6 @@ function App() {
     // Event Listeners
     useEffect(() => {
         function handleResize() {
-            console.log(window.innerWidth, window.innerHeight)
             setWindowDimensions({
                 width: window.innerWidth,
                 height: window.innerHeight
@@ -64,6 +69,10 @@ function App() {
         };
     }, []);
 
+    // Socket Initialisation
+    useEffect(() => {
+        setSocket(io(import.meta.env.VITE_BACKEND_URL));
+    }, []);
 
     // Canvas Initialization
     useEffect(() => {
