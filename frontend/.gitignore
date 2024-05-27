@@ -25,3 +25,6 @@ dist-ssr
 
 # Vite folder
 .vite
+
+# Env file
+.env
