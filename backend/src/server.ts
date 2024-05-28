@@ -1,12 +1,15 @@
 import express from "express";
 import {createServer} from "http";
 import websocket from "./websocket";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 
 const httpServer = createServer(app);
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 websocket(httpServer);
 
