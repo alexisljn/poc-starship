@@ -23,6 +23,11 @@ function App() {
         setSocket
     ] = useState<Socket | null>(null);
 
+    const [
+        isView,
+        setIsView
+    ] = useState<boolean>(false);
+
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const ctx = useMemo(() => {
@@ -68,11 +73,24 @@ function App() {
         };
     }, []);
 
+    // View Mode Initialisation
+    useEffect(() => {
+        const url = new URL(window.location.href);
+
+        const path = url.pathname.split('/').join('');
+
+        if (path === "view") {
+            setIsView(true);
+        }
+
+    }, []);
+
     // Socket Initialisation
     useEffect(() => {
         setSocket(io(import.meta.env.VITE_BACKEND_URL));
     }, []);
 
+    // Socket Listeners
     useEffect(() => {
         if (!socket || !ctx) {
             return;
@@ -116,7 +134,7 @@ function App() {
 
 
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (!ctx) {
+        if (!ctx || isView) {
             return;
         }
 
@@ -136,7 +154,7 @@ function App() {
             color,
         });
 
-    }, [ctx, color, socket]);
+    }, [ctx, color, socket, isView]);
 
     const handleColorChange = (e: React.MouseEvent<HTMLDivElement>, color: Color) => {
         e.stopPropagation();
@@ -178,54 +196,58 @@ function App() {
                 width={windowDimensions.width}
                 height={windowDimensions.height}
             ></canvas>
-            <div
-                id="palette"
-                style={{
-                    zIndex: 1,
-                    display: "flex",
-                    gap: "10px",
-                    paddingBottom: "40px"
-                }}
-            >
-                {colors.map((color) => (
-                    <div
-                        key={color}
-                        style={{
-                            cursor: "pointer",
-                            border: "3px solid lightgray",
-                            backgroundColor: color,
-                            width: 30,
-                            height: 30,
-                            borderRadius: 25
-                        }}
-                        onClick={(e) => handleColorChange(e, color)}
-                    ></div>
-                ))}
+            {!isView &&
                 <div
+                    id="palette"
                     style={{
-                        alignSelf: "center",
+                        zIndex: 1,
+                        display: "flex",
+                        gap: "10px",
+                        paddingBottom: "40px"
                     }}
                 >
-                    <span
+                    {colors.map((color) => (
+                        <div
+                            key={color}
+                            style={{
+                                cursor: "pointer",
+                                border: "3px solid lightgray",
+                                backgroundColor: color,
+                                width: 30,
+                                height: 30,
+                                borderRadius: 25
+                            }}
+                            onClick={(e) => handleColorChange(e, color)}
+                        ></div>
+                    ))}
+                    <div
                         style={{
-                            fontSize: 25,
-                            cursor: "pointer",
+                            alignSelf: "center",
                         }}
-                        onClick={(e) => handleCanvasReset(e)}
-                    >🗑️</span>️
+                    >
+                        <span
+                            style={{
+                                fontSize: 25,
+                                cursor: "pointer",
+                            }}
+                            onClick={(e) => handleCanvasReset(e)}
+                        >🗑️</span>️
+                    </div>
                 </div>
-            </div>
-            <div
-                id="mouse-tracker"
-                style={{
-                    width: PIXEL_SIZE,
-                    height: PIXEL_SIZE,
-                    backgroundColor: color,
-                    position: "absolute",
-                    top: mousePosition.y - PIXEL_OFFSET,
-                    left: mousePosition.x - PIXEL_OFFSET,
-                }}
-            ></div>
+            }
+            {!isView &&
+                <div
+                    id="mouse-tracker"
+                    style={{
+                        width: PIXEL_SIZE,
+                        height: PIXEL_SIZE,
+                        backgroundColor: color,
+                        position: "absolute",
+                        top: mousePosition.y - PIXEL_OFFSET,
+                        left: mousePosition.x - PIXEL_OFFSET,
+                    }}
+                ></div>
+            }
         </div>
     )
 }
