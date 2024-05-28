@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "build:render": "npm install && npm run build && npm run start",
+    "build:render": "npm install && npm run build",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts"
   },
@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "socket.io": "^4.7.5"
   },
