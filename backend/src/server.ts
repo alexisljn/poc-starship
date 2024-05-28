@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 websocket(httpServer);
 
 app.get('/', (req, res) => {
-    res.status(200);
+    res.status(200).end();
 })
 
 httpServer.listen(port, () => {
