@@ -10,5 +10,8 @@ export default defineConfig({
       usePolling: true,
       interval: 1000,
     }
+  },
+  build: {
+    target: "es2019"
   }
 })
