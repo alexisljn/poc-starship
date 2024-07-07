@@ -5,6 +5,10 @@ export type Coords = {
     y: number
 }
 
-export type PaintCoords = Coords &{
+export type PaintCellCoords = Coords & {
     color: Color;
+}
+
+export type PaintCellCoordsWithCanvasId = PaintCellCoords & {
+    canvasId: string
 }
