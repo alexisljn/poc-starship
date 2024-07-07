@@ -1,7 +1,7 @@
 import {Server as HttpServer} from "http";
 import {Server} from "socket.io";
 import {addToStore, clearStore, getStore} from "./store";
-import {PaintCoords} from "./types";
+import {CellWithCanvasId} from "./types";
 
 export default (httpServer: HttpServer) => {
 
@@ -16,16 +16,16 @@ export default (httpServer: HttpServer) => {
 
         socket.emit("init", getStore());
 
-        socket.on("paint", (coords: PaintCoords) => {
-            addToStore(coords);
+        socket.on("paint", (cellData: CellWithCanvasId) => {
+            addToStore(cellData);
 
-            socket.broadcast.emit("update", coords);
+            socket.broadcast.emit("update", cellData);
         })
 
-        socket.on("clear", () => {
-            clearStore();
+        socket.on("clear", (canvasId: string) => {
+            clearStore(canvasId);
 
-            io.emit("reset", getStore());
+            io.emit("reset", canvasId);
         })
 
         socket.on('disconnect', () => {
