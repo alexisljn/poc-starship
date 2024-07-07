@@ -157,7 +157,15 @@ const Canvas = React.memo(function Canvas({ratioX, ratioY, id, isDisplay}: Canva
     return (
         <>
             {!isDisplay &&
-                <div style={{display: "flex", gap: 15}}>
+                <div style={{display: "flex", gap: 15, alignItems: "center"}}>
+                    <p
+                        style={{
+                            fontSize: 17,
+                            cursor: "pointer",
+                            zIndex: 1,
+                        }}
+                        onClick={handleCanvasReset}
+                    >🗑️</p>
                     <p><strong>Canvas</strong> : {id}</p>
                     {gridPosition && <p>Position : {gridPosition.y}, {gridPosition.x}</p>}
                 </div>
@@ -184,15 +192,6 @@ const Canvas = React.memo(function Canvas({ratioX, ratioY, id, isDisplay}: Canva
                     </div>
                 ))}
             </div>
-            {!isDisplay &&
-                <p
-                    style={{
-                        fontSize: 20,
-                        cursor: "pointer",
-                    }}
-                    onClick={handleCanvasReset}
-                >🗑️</p>
-            }
         </>
     )
 });
