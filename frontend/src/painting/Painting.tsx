@@ -57,12 +57,14 @@ function Painting() {
                     display: "flex",
                     justifyContent: "center",
                     gap: "10px",
+                    pointerEvents: "none",
                 }}
             >
                 {colors.map((colorFromArray) => (
                     <div
                         key={colorFromArray}
                         style={{
+                            pointerEvents: "auto",
                             cursor: "pointer",
                             border: "3px solid lightgray",
                             backgroundColor: colorFromArray,
