@@ -35,14 +35,12 @@ function Painting() {
     }
 
     return (
-        <div
-            style={{
-                padding: 10,
-            }}
-        >
+        <div>
             <p style={{fontSize: 30, textAlign: "center"}}>Painting</p>
             {Object.entries(canvasList).map(([key, {ratioX, ratioY}]) => (
-                <div key={key}>
+                <div key={key}
+                     style={{paddingTop: 15, paddingBottom: 15, paddingLeft: 20}}
+                >
                     <Canvas ratioX={ratioX} ratioY={ratioY} id={key} isDisplay={false}/>
                 </div>
             ))}
