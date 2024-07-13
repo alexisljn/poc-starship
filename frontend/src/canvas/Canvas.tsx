@@ -174,6 +174,7 @@ const Canvas = React.memo(function Canvas({ratioX, ratioY, id, isDisplay}: Canva
                 id="grid"
                 onMouseLeave={isDisplay ? undefined : onGridLeave}
                 onClick={isDisplay ? undefined : handleClick}
+                style={{width, paddingRight: 20}}
             >
                 {grid.map((line, lineIndex) => (
                     <div key={lineIndex} style={{width, height: PIXEL_SIZE, display: "flex"}}>
