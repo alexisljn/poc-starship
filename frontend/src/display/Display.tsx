@@ -14,11 +14,13 @@ export default function Display() {
     }
 
     return (
-        <Canvas
-            id={id}
-            ratioX={canvasList[id].ratioX}
-            ratioY={canvasList[id].ratioY}
-            isDisplay={true}
-        />
+        <div style={{overflow: "hidden"}}>
+            <Canvas
+                id={id}
+                ratioX={canvasList[id].ratioX}
+                ratioY={canvasList[id].ratioY}
+                isDisplay={true}
+            />
+        </div>
     )
 }
